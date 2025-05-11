@@ -1,34 +1,34 @@
 Software was tested with
 ------------------------
-Browser: Chrome Version 126.0.6478.127
-Python 3.10.9
+Browser: Chrome Version 126.0.6478.127 \
+Python 3.10.9 \ 
 
-URL: http://127.0.0.1:8000
+URL: http://127.0.0.1:8000 
 
 Start Server on command line
 ----------------------------
-pip install -r requirements.txt
-cd restserver
+pip install -r requirements.txt \
+cd restserver \
 python manage.py runserver
 
 Build and run docker container
 ------------------------------
-docker build -t lingraphsim .
+docker build -t lingraphsim . \
 docker run -dp 8000:8000 lingraphsim
 
 Stop docker container
 ---------------------
-docker ps 
-docker stop <container-id>
+docker ps \
+docker stop <container-id> 
 
 Main software packages used
 ---------------------------
-Django
-D3js
-Bootstrap
-JQuery
-OR-Tools
-SciPy
+Django \
+D3js  \
+Bootstrap \
+JQuery \
+OR-Tools \
+SciPy 
 
 File Structure of most important files and directories
 ------------------------------------------------------
@@ -51,5 +51,5 @@ restserver/RestPlanServe/graph/test.py                          - Testing differ
 restserver/RestPlanServe/templates                              - Direcory for Interface of simulator \
 restserver/RestPlanServe/templates/graphInterface.html          - Template for running graph with different options \
 restserver/RestPlanServe/templates/output.html                  - Template for analysing and modifying graph \
-output                                                          - Directory for generated files LinGraph Algorithm with optimisation \
+output                                                          - Directory for generated files LinGraph Algorithm with optimisation 
 
