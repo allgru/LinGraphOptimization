@@ -1,11 +1,11 @@
-LinGraph
+LinGraph Optimization
 ------------------------
 LinGraph is a graph-based automated planner for concurrent task planning based on linear logic. This repository provides an implementation of different optimization methods and a testing interface implemented with Django.
 
 Software was tested with
 ------------------------
 Browser: Chrome Version 126.0.6478.127 \
-Python 3.10.9  
+Python: 3.10.9  
 
 URL: http://127.0.0.1:8000 
 
