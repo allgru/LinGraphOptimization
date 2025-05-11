@@ -1,0 +1,27 @@
+[
+	{
+	"model": "RestPlanServe.PositionMovement",
+	"pk": 1,
+	"fields": {
+		"robot": "r1",
+		"direction": "forward"
+	}
+	},
+	{
+	"model": "RestPlanServe.PositionMovement",
+	"pk": 2,
+	"fields": {
+		"robot": "r1",
+		"direction": "forward"
+	}
+	},
+	{
+	"model": "RestPlanServe.BoxAction",
+	"pk": 1,
+	"fields": {
+		"robot": "r1",
+		"action": "pickup"
+	}
+	}
+
+]

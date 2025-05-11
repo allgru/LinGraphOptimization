@@ -1,0 +1,122 @@
+<!-- TODO: Radiobutton -->
+<!-- TODO: Distance functions -->
+<html>
+<head>
+    <title>Graph Input</title>
+    <script src="/static/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+</head>
+<body>
+<div class="contrainer" style="margin-left: 20px;">
+    <a name="start"></a>
+    <h1>LinGraph</h1>
+ <form action="/" method="post">{% csrf_token %}
+
+    <h2>LinGraph Input</h2>
+    <a href="#output">Console Output</a><br />
+    <a href="#conf">Configuration filte</a><br />
+
+    Input for LinGraph (first row: init states, second row: goals, third row: action formulars)<br />
+    <textarea name="graph_input" cols="160" rows="15">{{ graph_input}}</textarea><br />
+    <p>&nbsp;</p>
+    <h2>Syntax explaination</h2>
+    <pre>
+        [('ressource 1',number of elements),('ressource 2',number of elements),...,('resource n',number of elements)]
+        [('resource 1',number of resources),...,('resource n', number of resources)] 
+        [('action formula name',[('precondition resource 1',number of resources required),('precondition resource 2',number of resources required),...,('precondition resource n', number of resources required)],[('effect resource 1', number of resources)])]
+    </pre>
+    <p>&nbsp;</p>
+    <!-- TODO: Clear button -->
+    <!-- Take value and select default new -->
+
+    <h2>Algorithm Configuration</h2>
+    <!--- input type="radio" name="algorithm" value="classic" {% if algorithm == 'classic' %}checked{% endif %}> Classic</!--- ---> <input type="radio" name="algorithm" value="new" {% if algorithm != 'classic' %}checked{% endif %}> New</input><br />
+    <input type="checkbox" name="reverse" value="1"  {% if reverse == '1' %}checked{% endif %} /> Reverse (Expand from goal to init nodes)<br /> 
+    <h3>Boundary</h3>
+    <input type="checkbox" name="value_boundary" value="1"  {% if value_boundary == '1' %}checked{% endif %} /> Action formulae value boundary<br /> 
+    <h3>Clustering</h3>
+    <input type="checkbox" name="action_combine" value="1" {% if action_combine == '1' %}checked{% endif %} />Activate Cluster action formulae</input><br /> 
+    <h4>Merge technique</h4>
+    <input type="radio" name="merge_technique" value="partial" {% if merge_technique == "partial" %}checked{% endif %}> Partial Combination (Merge )</input> <input type="radio" name="merge_technique" value="standard" {% if merge_technique == "standard" %}checked{% endif %}> Full Merging</input><br />
+
+
+    <h4>Similarity threshold</h4>
+    <input type="input" name="similarity_threshold" value="{{ similarity_threshold }}"/>
+     <!--- TODO: Update --->
+     <!--- TODO: load selected distancefunction  distance_function == ''?'selected':''  --->
+     <h4>Distance Functions</h4>
+     <select name="distance_functions" class="selectpicker" aria-label="Default select example">
+        <option value="simple" {% if distance_functions == 'simple' %}selected{% endif %}>Simple</option>
+        <option value="braycurtis" {% if distance_functions == 'braycurtis' %}selected{% endif %}>Bray Curtis Dissimilarity</option>
+        <option value="canberra" {% if distance_functions == 'canberra' %}selected{% endif %}>Canberra Distance</option>
+        <option value="chebychev" {% if distance_functions == 'chebychev' %}selected{% endif %}>Chebychev</option>
+        <option value="correlation" {% if distance_functions == 'correlation' %}selected{% endif %}>Correlation Distance</option>
+        <option value="cosine" {% if distance_functions == 'cosine' %}selected{% endif %}>Cosine Similarity</option>
+        <option value="dice" {% if distance_functions == 'dice' %}selected{% endif %}>Dice Distance</option>
+        <option value="euclidean" {% if distance_functions == 'euclidean' %}selected{% endif %}>Euclidean Distance</option>
+        <option value="hamming" {% if distance_functions == 'hamming' %}selected{% endif %}>Hamming Distance</option>
+        <option value="jaccard" {% if distance_functions == 'jaccard' %}selected{% endif %}>Jaccard Distance</option>
+        <option value="jensenshannon" {% if distance_functions == 'jensenshannon' %}selected{% endif %}>Jensen Shannon Distance</option>
+        <option value="kulczyinski1" {% if distance_functions == 'kulczyinski1' %}selected{% endif %}>Kulczinski1 Distance</option>
+        <option value="manhattan" {% if distance_functions == 'manhattan' %}selected{% endif %}>Manhattan Distance</option>
+        <option value="minkowski" {% if distance_functions == 'minkowski' %}selected{% endif %}>Minkowski Distance</option>
+        <!-- option value="pearson" {% if distance_functions == 'pearson' %}selected{% endif %}>Pearsons Coefficient</!-->
+        <option value="rogertanimoto" {% if distance_functions == 'rogertanimoto' %}selected{% endif %}>Roger Tanimoto</option>
+        <option value="russelrao" {% if distance_functions == 'russelrao' %}selected{% endif %}>Russel Rao Distance</option>
+        <option value="sokalmichener" {% if distance_functions == 'sokalmichener' %}selected{% endif %}>Sokal Michener Distance</option>
+        <option value="sokalsneath" {% if distance_functions == 'sokalsneath' %}selected{% endif %}>Sokal Sneath Distance</option>
+        <!-- option value="spearman" {% if distance_functions == 'spearman' %}selected{% endif %}>Spearman Rank Correlation</!-->
+        <option value="sqeuclid" {% if distance_functions == 'sqeuclid' %}selected{% endif %}>Square Euclid</option>
+        <!-- option value="wasserstein" {% if distance_functions == 'wasserstein' %}selected{% endif %}>Wasserstein</!-->
+        <option value="yule" {% if distance_functions == 'yule' %}selected{% endif %}>Yule Distance</option>
+    </select>
+    <h3>Pruning</h3>
+    <input type="checkbox" name="pruning" value="1"  {% if pruning == '1' %}checked{% endif %} /> Activate Pruning<br /> 
+    <h4>Weighting method</h4>
+    <select name="weighting_method">
+        <option value="random" {% if weighting_method == 'random' %}selected{% endif %}> Random</option>
+        <option value="max" {% if weighting_method == 'max' %}selected{% endif %}> Max</option>
+        <option value="min" {% if weighting_method == 'min' %}selected{% endif %}> Min</option>
+        <option value="median" {% if weighting_method == 'median' %}selected{% endif %}>Median</option>
+        <option value="mean" {% if weighting_method == 'mean' %}selected{% endif %}>Mean</option>
+    </select>
+    <h4>Pruning strategy</h4>
+    <select name="pruning_type">
+        <option value="random" {% if pruning_type == 'random' %}selected{% endif %}> Random</option>
+        <option value="top" {% if pruning_type == 'top' %}selected{% endif %}>Top percent</option>
+        <option value="bottom" {% if pruning_type == 'bottom' %}selected{% endif %}>Bottom percent</option>
+        <option value="outer" {% if pruning_type == 'outer' %}selected{% endif %}>Outer percent</option>
+        <option value="middle" {% if pruning_type == 'middle' %}selected{% endif %}>Middle percent</option>
+    </select>
+    <h4>Percentage to prune</h4>
+    <input type="number" name="pruning_percentage" min="0" max="100" value="{{pruning_percentage}}" />%<br />
+    <p>&nbsp;</p>
+    <p>
+        <input type="submit" value="Prove!" class="btn btn-success"/> (This could take some time)<br /> 
+    </p>
+</form>
+
+<p>&nbsp;</p>
+
+<h2>Consule Output</h2>
+<a name="output"></a>
+<a href="#start">go up</a><br />
+<textarea name="graph_output" cols="100" rows="100" style="background-color: black;color: white; font-family:'Courier New', Courier, monospace;">
+{{form.graph_output}}
+</textarea><br>
+
+<a href="#start">go up</a><br />
+<h2>Editor</h2>
+<a name="conf"></a>
+<h3>Click on on of the files to view Graph and prune nodes</h3>
+<table>
+    {% for link in form.links %}
+    <tr>
+        <td><a href="/showgraph?url={{link}}">{{link}}</a></td>
+    </tr>
+    {% endfor %}
+</table>
+<a href="#start">go up</a><br />
+</div>
+</body>
+</html>

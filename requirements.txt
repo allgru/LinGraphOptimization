@@ -1,0 +1,9 @@
+ortools
+django
+djangorestframework
+numpy
+djangorestframework-jsonapi
+django-filter
+scikit-learn
+scipy
+scikit-learn

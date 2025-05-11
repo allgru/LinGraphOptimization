@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="/static/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="/static/jquery-3.7.1.min.js"></script>
+    <script src="/static/bootstrap.bundle.min.js"></script>
+    <title>LinGraph Node Output</title>
+</head>
+<body>
+    <div class="contrainer" style="margin-left: 20px;">
+        <h1>LinGraph</h1>
+
+        <p><a href="/">Return to main page</a></p>
+
+        <!-- 
+        <form action="/" method="post">{% csrf_token %}
+
+            {{form.test}}
+            <h2>LinGraph Input</h2>
+            Input for LinGraph (first row: init states, second row: goals, third row: action formulars)<br />
+            <textarea name="graph_input" cols="100" rows="20">
+                [('C1', 32), ('C2', 32), ('M', 48)]
+                [('P', 16), ('FP', 4), ('M', 48)]
+                [('Make S1',[('C1', 1),('M', 1)],[('S1', 1),('M', 1)]),('Make S2',[('C2', 1),('M', 1)],[('S2', 1),('M', 1)]),('Make P',[('S1', 1),('S2', 1),('M', 1)],[('P', 1),('M', 1)]),('Make FP',[('P', 4),('M', 1)],[('FP', 1),('M', 1)])]
+            </textarea><br />
+        
+            <h2>Syntax</h2>
+            <pre>
+                [('ressource 1',number of elements),('ressource 2',number of elements),...,('resource n',number of elements)]
+                [('resource 1',number of resources),...,('resource n', number of resources)] 
+                [('action formula name',[('precondition resource 1',number of resources required),('precondition resource 2',number of resources required),...,('precondition resource n', number of resources required)],[('effect resource 1', number of resources)])]
+            </pre> -->
+            <!-- TODO: Correct Interface !!! -->
+            <!-- Take value and select default new -->
+            <!-- Use <input type="radio" name="algorithm" value="classic">classic</input> <input type="radio" name="algorithm" value="new">new</input><br />
+            <input type="checkbox" name="action_combine" />Combine Actions</input><br /> 
+            <input type="checkbox" name="reverse"  />Reverse <br />  -->
+            <!-- TODO: Remove? -->
+            <!-- <select name="distance_functions">
+                <option value="simple">Simple</option>
+                <option value="chebychev">Chebychev</option>
+                <option value="cosine">Cosine Similarity</option>
+                <option value="euclidean">Euclidean Distance</option>
+                <option value="manhattan">Manhattan Distance</option>
+                <option value="minkowski">Minkowski Distance</option>
+                <option value="pearson">Pearsons Coefficient</option>
+                <option value="spearman">Spearman Rank Correlation</option>
+                <option value="hamming">Hamming Distance</option>
+                <option value="canberra">Canberra Distance</option>
+                <option value="correlation">Correlation Distance</option>
+                <option value="czekanowski">Czekanowski Dice Coefficient</option>
+                <option value="braycurtis">Bray Curtis Dissimilarity</option>
+                <option value="jensenshannon">Jensen Shannon Distance?</option>
+                <option value="sqeuclid">Square Euclidean Distance</option>
+                <option value="rogertanimoto">Roger Tanimoto</option>
+                <option value="jaccard">Jaccard Distance</option>
+                <option value="kulczyinski1">Kulczinski1 Distance</option>
+                <option value="russelrao">Russel Rao Distance</option>
+                <option value="sokalmichener">Sokal Michener Distance</option>
+                <option value="sokalsneath">Sokal Sneath Distance</option>
+                <option value="yule">Yule Distance</option>
+            </select>
+            <br /> -->
+            <!-- input type="submit" value="Prove!" />(This could take some time)<br /> 
+        </form>-->
+        
+
+        <!-- Step -->
+        <!-- Reload with Rest -->
+        <!-- send json / receive json -->
+        <!-- update net -->
+        <!-- Action formulas / goals -->
+
+
+        <!-- TODO: Clear -->
+        <!-- TODO: Alles speichern -->
+
+        <h2>Output</h2>
+        <textarea id="graph_output" name="graph_output" cols="100" rows="100" style="background-color: black;color: white; font-family:'Courier New', Courier, monospace;">
+        {{form.graph_output}}
+        </textarea><br>
+        
+
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                &nbsp;<button onClick="hideZeroConnections()" type="button" class="btn btn-primary rounded" data-mdb-ripple-init>Show/ hide zero value connections</button>&nbsp;
+                <button onClick="hideZeroActions()" type="button" class="btn btn-primary" data-mdb-ripple-init>Show/ hide zero value action nodes</button>&nbsp;
+                <button onClick="hideZeroStates()" type="button" class="btn btn-primary" data-mdb-ripple-init>Show/ hide zero value state nodes</button>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                &nbsp;<button onClick="deleteNode()" type="button" class="btn btn-danger" data-mdb-ripple-init>Delete Node</button>&nbsp;&nbsp;
+                <button onClick="alignValueNodes()" type="button" class="btn btn-success" data-mdb-ripple-init>Align Value Nodes and hide zero value connections, action and state nodes</button><br />
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                &nbsp;<button onClick="resetGraph()" type="button" class="btn btn-warning" data-mdb-ripple-init>Reset Graph</button>&nbsp;&nbsp;<button onClick="previousStep()" type="button" class="btn btn-warning" data-mdb-ripple-init>|&lt; Previous Step</button>&nbsp;
+                <button onClick="nextStep()" type="button" class="btn btn-warning" data-mdb-ripple-init>Next step &gt;|</button>&nbsp;&nbsp;
+                <button onClick="completeGraph()" type="button" class="btn btn-warning" data-mdb-ripple-init>Complete Graph</button><br />
+            </div>
+        </div>
+        <p>
+            Legend: First row in Object is resource type and capacity. Second row is value calculated by CSP-solver if available. Third row is weighting (green color) if available. On the right side label name can be found.
+        </p>
+        <!--- Display graph --->
+        <div id="container"></div>
+    
+        <script type="text/javascript">
+
+            // TODO: Going back only delete actions + their state nodes
+            // TODO: Displayerror goals
+            // TODO: Loading symbol
+            // TODO: Error with connections -> insert waiting time
+            // TODO: Improve code
+            // TODO: Give information: number of nodes etc.
+            // TODO: Nice for discussion: It would be great if we good we could align the nodes if only shown nodes with value
+            // TODO: Code is a bit heavy as it works with files. Can there be a sort of rest communication?
+            // TODO: How to save nodes deleted with different steps
+            // TODO: Align would be really nice to have :|) Level from top to bottom get all hidden off level replace by node underneath adjust connections
+            // TODO: Replace if deleted? 
+            // Display process of LinGraph
+            // TODO: Can we get more information??
+
+            // TODO: Go steps back and run step again 
+            // TODO: run each step -> second window
+
+            // Initial configuration
+            var CurrentJSONStr = ''; // JSON string for parsing
+            var bHideZeroConnections = false;
+            var bHideZeroActions = false;
+            var bHideZeroStates = false;
+            var groupNodes = [];
+            var maxLevel = 0;
+            var selectedMaxLevel = 0;
+            var deleteNodeActivate = false;
+
+            // TODO: Make scrollable
+            const width = 80000; // No autoscale :(
+            const height = 80000;
+
+
+            // TODO: Autoscale
+
+            const marginTop = 20;
+            const marginRight = 20;
+            const marginBottom = 30;
+            const marginLeft = 40;
+            var coords = {};
+
+
+            // Create the SVG container.
+            const svg = d3.create("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            // TODO: What of this can be erased or improved?
+            const barwidth = 25;
+            const corner = Math.floor((barwidth/2) + 5);
+            margin = ({top: 100, right: 20, bottom: 70, left: 140});
+            x=100;
+            y=100;
+
+            scaleY = d3.scaleLinear([10, 130], [0, 960]);
+            scaleX = d3.scaleLinear()
+            .domain([0, 100])
+            .range([margin.left, width - margin.right]);
+
+            margin = ({top: 100, right: 20, bottom: 70, left: 140});
+
+            // Start functions 
+
+            /**
+             * Add action node to SVG canvas and save certain information
+             * 
+             * @param {string} label       - Name of action formula, for examples (Make S)
+             * @param {string} actionName  - Name of action node, for examples (a1, a2, ...)
+             * @param {integer} capacity   - Number of maximum node count
+             * @param {integer} value      - Value the CSP-solver has calculated
+             * @param {integer} weight     - if weighting was applied by optimization algorithm 
+             * @param {integer} x          - x-Coordinate 
+             * @param {integer} y          - y-Coordinate
+             * @param {string} id          - ID for being able to perform visual manipulation on objects
+             * @param {integer} level      - level on which the action is situated
+             * @param {boolean} copy       - Whether action node is a copy node
+             * @param {string} uuid        - Unique ID
+             */
+            function addAction( label, actionName, capacity, value, weight, x, y, id, level, copy, uuid)
+            {
+                if (value >0) // mark if has value
+                {
+                    color = "red";
+                }
+                else
+                {
+                    color = "black"
+                }
+                var positionx = x;
+                var positiony = y;
+                var width = 130;
+                var height = 80;
+                var radius = (width+height)/3.5;
+
+                // Create group
+                const g = svg.append("g")
+                    .attr( "transform", "translate("+ positionx + ", " + positiony + ")")
+                    .attr("id", "id" + id)
+                    .attr("level", level)
+                    .attr("label", label)
+                    .attr("state", actionName)
+                    .attr("uuid", uuid)
+                    .attr("weight",weight)
+                    .attr("value",value)
+                    .attr("capacity", capacity)
+                    .attr("copy",copy)
+                    .attr("type", "action")
+                    .attr("leftNode","")
+                    .attr("rightNode","")
+                    .on("click", (event) => handleNodeClicked("id" + id));            
+
+                // create ellipse
+                g.append("ellipse")
+                    .attr("ry", radius)
+                    .attr("rx", 1.5*radius)
+                    .attr("cx",(width/2))
+                    .attr("cy",(height/2))
+                    .attr("stroke-width", 1)
+                    .attr("fill","transparent")
+                    .attr("stroke",color)
+                    .attr("class","avalue"+value)
+
+                // set Text
+                g.append("text").attr("x",(width/8)) .attr("y",(height/3)).attr("stroke",color)   .attr("class","avalue"+value).text(label + ' : ' + capacity);
+                g.append("text").attr("x",width-30)  .attr("y",height-10) .attr("stroke",color)   .attr("class","avalue"+value).text(actionName);
+                g.append("text").attr("x",width/2)   .attr("y",height-30) .attr("stroke",color)   .attr("class","avalue"+value).text(value);
+                g.append("text").attr("x",width/2-36).attr("y",height-15) .attr("stroke","green").attr("class","avalue"+value).text(parseFloat(weight).toFixed(6));
+
+                g.call(drag); // create event
+
+                groupNodes.push({"id": id, "g": g}); // add to array for being able to identify
+            }
+
+
+            /**
+             * Add state node to SVG canvas and save certain information
+             * 
+             * @param {string} label        - Name of state node resource
+             * @param {string} stateName    - Name of state node, for examples (s1, s2, ...)
+             * @param {integer} capacity    - Number of maximum node count
+             * @param {integer} value       - Value the CSP-solver has calculated
+             * @param {integer} weight      - if weighting was applied by optimization algorithm 
+             * @param {integer} x           - x-Coordinate 
+             * @param {integer} y           - y-Coordinate
+             * @param {string} id           - ID for being able to perform visual manipulation on objects
+             * @param {integer} level       - level on which the state node is situated
+             * @param {boolean} copy        - Whether state node is a copy node
+             * @param {string} uuid         - Unique ID
+             */
+        function addState(label, stateName, capacity, value, x, y, id, level, weight, copy, uuid)
+            {
+                if (value >0) // Mark if has value
+                {
+                    color = "red";
+                }
+                else
+                {
+                    color = "black"
+                }
+
+                var positionx = x;
+                var positiony = y;
+                var width = 190;
+                var height = 50;
+                const g  = svg.append("g")
+                    .attr("transform",  "translate(" + positionx + "," + positiony + ")" )
+                    .attr("id",         "id" + id )
+                    .attr("uuid",       uuid )
+                    .attr("level",      level )
+                    .attr("type",       "state" )
+                    .attr("label",      label )
+                    .attr("value",      value )
+                    .attr("capacity",   capacity )
+                    .attr("weight",     weight )
+                    .attr("copy",       copy )
+                    .attr("state",      stateName )
+                    .on("click",        (event) => handleNodeClicked( "id" + id ) );            
+
+                g.append( "rect" )
+                    .attr( "x",            0 )
+                    .attr( "y",            0 )
+                    .attr( "width",        width )
+                    .attr( "height",       height )
+                    .attr( "fill",         "transparent" )
+                    .attr( "stroke-width", 1 )
+                    .attr( "stroke",       color )
+                    .attr( "class",       "svalue" + value )
+
+                g.append( "text" )
+                    .attr( "x",( width  / 3 ) ) 
+                    .attr( "y",( height / 3 ) )
+                    .attr( "stroke",color)
+                    .attr( "class","svalue" + value )
+                    .text( label + ' : ' + capacity );
+
+                g.append( "text")
+                    .attr( "x", width  - 80 )  
+                    .attr( "y", height - 10 ) 
+                    .attr( "stroke", color )
+                    .attr( "class", "svalue" + value )
+                    .text( stateName + '=' + value );
+                
+                g.call( drag );
+
+                // Identify by ID
+                groupNodes.push( {"id": id, "g": g} ); // add to array for beeing able to identify
+
+            }
+
+            
+            /**
+             * Add goal node to SVG canvas and save certain information
+             * 
+             * @param {string} label        - Name of resource
+             * @param {string} stateName    - Name of goal node , for examples (g1, g2, ...)
+             * @param {integer} capacity    - Number of maximum node count
+             * @param {integer} value       - Value of the goal
+             * @param {integer} x           - x-Coordinate 
+             * @param {integer} y           - y-Coordinate
+             * @param {string} id           - ID for being able to perform visual manipulation on objects
+             */
+            function addGoal(label, stateName, capacity, x, y, value, id)
+            {
+                var positionx = x;
+                var positiony = y;
+                var width = 130;
+                var height = 100;
+                // var radius = (width+height)/3;
+                var radius = 45;
+
+                // Define Path
+                var path = "M45,0"; // Starting coordinate
+                path += "A" + radius + "," + radius; // arc 180°
+                path += ",0,0,0,45," + height;
+                path += "L" + width + "," + height; // line
+                path += "A" + radius + "," + radius; // arc 180°
+                path += ",0,0,0," + width +",0";
+                path += "L45,0"; // line
+                path += 'Z';
+
+                // create group
+                const g  = svg.append("g")
+                    .attr("transform","translate(" + positionx + "," + positiony + ")")
+                    .attr("id","id" + stateName)
+                    .attr("nodeLeft","")
+                    .attr("nodeRight","");
+
+                // create path like a pill
+                g.append("path")
+                    .attr("d",      path)
+                    .attr("stroke", "purple")
+                    .attr("fill",   "transparent");
+
+                // name of resource
+                g.append("text")
+                    .attr("x",      (width/3))
+                    .attr("y",      (height/3))
+                    .attr("stroke", "purple")
+                    .text(label);
+
+                // name of goal and value
+                g.append("text")
+                    .attr("x",      width-80) 
+                    .attr("y",      height-10) 
+                    .attr("stroke","purple")
+                    .text(stateName + '=' + value);
+
+                g.call(drag);    
+
+                groupNodes.push({"id": id, "g": g}); // add to array for being able to identify
+            }
+
+            /**
+             * Add connection to SVG canvas and save certain information
+             * 
+             * @param {string} nodeLeft     - Name of node on the left side
+             * @param {string} nodeRight    - Name of node on the right side
+             * @param {integer} capacity    - Number of maximum node count
+             * @param {integer} x1          - Left x-Coordinate of line
+             * @param {integer} y1          - Left y-Coordinate of line
+             * @param {integer} x2          - Right x-Coordinate of line 
+             * @param {integer} y2          - Right y-Coordinate of line
+             * @param {string} uuid         - Unique identifier
+             * @param {integer} level       - Level in which the connection resides
+             */
+            function addConnection(x1, y1, x2, y2, cardinality, nodeLeft, nodeRight, uuid, level)
+            {
+                if (cardinality >0) // mark if has value
+                {
+                    color = "LightCoral";
+                }
+                else
+                {
+                    color = "gray"
+                }
+            
+                const g  = svg.append("g")
+                    .attr( "transform",   "translate(" + x1 + "," + y1 + ")")
+                    .attr( "uuid",        uuid)
+                    .attr( "type",        "connection")
+                    .attr( "cardinality", cardinality)
+                    .attr( "level",       level)
+                    .attr( "id",          "id" + nodeLeft + "-" + nodeRight)
+                    .attr( "leftnode",    nodeLeft)
+                    .attr( "rightnode",   nodeRight);
+
+
+                g.append("line").style("stroke",color).style("stroke-width", 1).style("stroke-dasharray","2,2")
+                .attr( "x1",          0)
+                .attr( "y1",          0)
+                .attr( "x2",          x2-x1)
+                .attr( "y2",          y2-y1)
+                .attr( "class",       "count" + cardinality);
+
+                g.append("text").attr("x",((x2-x1)/2)).attr("y",((y2-y1)/2)).attr("stroke",color).attr("class","count"+cardinality).text(cardinality  );
+            
+                // TODO: Austauschen durch Selector
+                var leftNodeObject = getGroupObject(nodeLeft);
+                
+                if (leftNodeObject != null)
+                {
+                    var leftNodeText = leftNodeObject.attr("leftNode");
+                    if (leftNodeText == "")
+                    {
+                        leftNodeObject.attr("leftNode", "id" + nodeLeft + "-" + nodeRight);
+                    }
+                    else
+                    {
+                        leftNodeObject.attr("leftNode",  leftNodeText + ",id" + nodeLeft + "-" + nodeRight);
+                    }
+                }
+
+                // TODO: Austauschen durch Selector
+                var rightNodeObject = getGroupObject(nodeRight);
+                if (rightNodeObject != null)
+                {
+                    var rightNodeText = rightNodeObject.attr("rightNode");
+                    if (rightNodeText == "")
+                    {
+                        rightNodeObject.attr("rightNode", "id" + nodeLeft + "-" + nodeRight);
+                    }
+                    else
+                    {
+                        if (rightNodeObject.attr("rightNode") != rightNodeText + ",id" + nodeLeft + "-" + nodeRight)
+                        {
+                            rightNodeObject.attr("rightNode", rightNodeText + ",id" + nodeLeft + "-" + nodeRight);
+                        }
+
+                    }
+                }
+
+            }
+
+            /**
+             * Get maximum level
+             * @return {integer} maximum level
+             */
+            function getLevel()
+            {
+                var level    = 0;
+                var jsonData = getJson();
+                jsonData.graph.forEach(
+                    item => {
+                        if (item.level > level)
+                        {
+                            level = item.level;
+                        }
+                    }
+                )
+                return level - 1;
+            }
+
+
+
+            /***
+             * Load JSON file from set by variable in url
+             */
+            async function getJson()
+            {
+                let obj;
+
+                var url = '/static/{{form.url}}'; 
+                const res = await fetch(url);
+
+                obj = await res.json();
+
+                return obj;
+            }
+
+            // TODO: Rename
+
+            /** 
+             * Get each level of graph
+             * Run level function
+             * @param {Array of } item 
+             */
+            function graph(item)
+            {
+                item.forEach(level);
+            }
+
+            /**
+             * Get Connections of graph
+             * run for each connection levelconnections function 
+             * @param {Array of} item
+             */
+            function graphConnection(item)
+            {
+                item.forEach(levelconnections);
+            }
+
+
+            /**
+             * For each level create all states
+             * @param {Array of} item
+             */
+            function level(item)
+            {
+
+                var x = (item.level-1)*600;
+                var y = 18;
+                svg.append("text").attr("x",x).attr("y",y).text("Level " + item.level);
+                states(item.states,item.level)
+                actions(item.actions,item.level)
+            }
+
+            /**
+             * Get Connections of graph
+             * Create connection
+             * @param {Array of} item Level with connecitons
+             */    
+            function levelconnections(item)
+            {
+                createConnections( item.connections, item.level );
+            }
+
+            /**
+             * Create state node on predefined level
+             * @param {Object} item - 
+             * @param {integer} level
+             */    
+            function states(item, level)
+            {
+                var x = (level-1)*600+1;
+                for (var i=0; i<item.length; i++)
+                {
+                    var y = 50 + i*173;
+                    coords[level + '_' + item[i].state] = [x,y];
+
+                    addState( item[i].label, item[i].state, item[i].capacity, 
+                    item[i].value, x, y, level + '_' + item[i].state, level,  
+                    item[i].weight, item[i].copy, item[i].uuid );
+                }
+            }
+
+            /**
+             * Create state node on predefined level
+             * @param {Object} item - 
+             * @param {integer} level
+             */    
+            function actions( item, level )
+            {
+                x = 300 + ( level - 1 ) * 600;
+                for (var i=0; i<item.length; i++)
+                {
+                    var y = 50 + i*200;
+                    coords[level + '_' + item[i].state] = [x,y];
+                    
+                    weight = 0;
+                    if (typeof item[i].weight != 'undefined')
+                    {
+                        weight = item[i].weight;
+                    }
+
+                    addAction( item[i].label, item[i].state, item[i].capacity, 
+                    item[i].value, weight, x, y, level + '_' + item[i].state, level, item[i].copy, item[i].uuid );
+                }
+            }
+
+            /**
+             * Add goal coordinates
+             * 
+             * @param item {object} - 
+             * @param level {integer} - level 
+             * @param lastlevelstates {array of states} -      
+             */
+            async function goals(item, level, lastlevelstates)
+            {
+                await wait(100); // Time out for overcoming synchronization issues
+                goalcoords = [];
+                var resources = {};
+
+                lastlevelstates.states.forEach((item2) => {
+                    if (typeof resources[item2.label] === 'undefined')
+                    {
+                        resources[item2.label] = item2.value;
+                    } else
+                    {
+                        resources[item2.label] += item2.value;
+                    }
+                    
+                    
+                    for (var i=0; i<item.length; i++)
+                    {
+                        if (item2.label == item[i].label)
+                        {
+                            // error which is able to happen. Synchronization is not perfect
+                            // if it is the case relaod page
+                            if (coords[level + '_' + item2.state] === undefined )
+                            {
+                                // TODO: Abfrage
+                                // window.location.reload();
+                            }
+
+                            goalcoords.push({"goal": item[i].state, "coords":coords[level + '_' + item2.state], "value":item2.value, "id":level + '_' + item2.state});
+                        }
+                    }
+                })
+
+                x = 400+(level-1)*600;
+
+                var y = 18;
+                svg.append("text").attr("x",x).attr("y",y).text("Goals");
+
+                for (var i=0; i<item.length; i++)
+                {
+                    var y = 50 + i*200;
+
+                    if (typeof resources[item[i].label] != 'undefined')
+                    {
+                        addGoal(item[i].label, item[i].state, item[i].capacity, x, y, resources[item[i].label], item[i].state);
+
+                        goalcoords.forEach(
+                            (item3) => 
+                            {
+                                if (item3['goal'] == item[i].state)
+                                {
+                                    if (item3['value']>0)
+                                    { 
+                                        try {
+                                            addConnection(item3['coords'][0]+190,item3['coords'][1]+30,x+10,y+50,item3['value'], item3["id"], item[i].state, "", level); // TODO: UUID
+                                        } catch (e)
+                                        {
+                                            console.log("Error. Please reload.");
+                                            console.log(e);
+                                        }
+                                    }
+
+                                }
+                            }
+                        );
+                    }
+                    else 
+                    {
+                        addGoal( item[i].label, '(x)' + item[i].state, item[i].capacity, x, y, 0 ,"");
+                    }
+                }
+            }
+
+
+            /**
+             * Create connection at predifined level
+             * @param {Object} item
+             * @param {integer} level
+             */
+            async function createConnections(item, level)
+            {
+                await wait(100);
+                for (var i=0; i<item.length; i++)
+                {
+
+                    if (item[i].leftnode[0]=='s')
+                    {
+                        levelleft = level;
+                        levelright = level;
+                        var offsetx1 =190;
+                        var offsetx2 = -20;
+                        var offsety2 = 33;
+                    }
+
+                    if (item[i].leftnode[0]=='a')
+                    {
+                        levelleft = level -1;
+                        levelright = level;
+                        var offsetx1 = 150;
+                        var offsetx2 = 0;
+                        var offsety2 = 24;
+                    }
+                    
+
+                    // error which is able to happen. Synchronization is not perfect
+                    // if it is the case relaod page
+                    if (coords[ levelleft + '_' + item[ i ].leftnode ] === undefined)
+                    {
+                        // TODO:  
+                        // window.location.reload();
+                    }
+
+                    try  {                        
+                        addConnection( coords[ levelleft + '_' + item[ i ].leftnode ][ 0 ] + offsetx1, coords[ levelleft + '_' + item[ i ].leftnode ][ 1 ] + 30, offsetx2 + coords[ levelright + '_' + item[ i ].rightnode ][ 0 ] + 10, offsety2 + coords[ levelright + '_' + item[ i ].rightnode ][ 1 ],item[ i ].cardinality, levelleft + '_' + item[i].leftnode,  levelright + '_' + item[i].rightnode, item[i].uuid, level );
+                    } catch (e) {
+                        console.log("Error. Please reload.");
+                        console.log(e);
+                    }
+                }
+            }
+
+            /**
+             * Get Group node of state by Name
+             * @param{string} stateName 
+             */
+            function getGroupObject(stateName)
+            {
+                for (let i=0; i<groupNodes.length;i++)
+                {
+                    if (groupNodes[i].id == stateName)
+                    {
+                        return groupNodes[i].g;
+                    }
+                }
+                return null;
+            }
+
+            // Run if node has been clicked
+            /**
+             * Remove node, if pruning is activated
+             * 
+             * @param {integer} nodeId Id that was clicked
+             */
+            function handleNodeClicked(nodeId) {
+                console.log(nodeId);
+                console.log("Clicked group ID:", d3.select("#" + nodeId).attr("id"));
+                console.log("Delete Node:", deleteNodeActivate);
+                if (deleteNodeActivate)
+                {
+                    var node = d3.select("#" + nodeId);
+                    // delete all links
+                    if (node.attr("leftNode") != null) // on first layer it could be null
+                    {
+                        var arrLeftNode = node.attr("leftNode").split(",");
+                        if (arrLeftNode.length>0)
+                        {
+                            arrLeftNode.forEach( // if left node then the group will move and we have to expand or shring the x and y coordinates of the line
+                                item => {
+                                    if (item != "null") // item could not be there, prevent errors
+                                    {
+                                        d3.select("#" + item).remove();
+                                    }
+                                }
+                            );
+                        }
+                        else 
+                        {
+                            addGoal( item[i].label, '(x)' + item[i].state, item[i].capacity, x, y, 0 ,"");
+                        }
+                    }
+                }
+
+                if (node.attr("rightNode") != null) // on last layer it could be null
+                {
+
+                    var arrRightNode = node.attr("rightNode").split(",");
+                    if (arrRightNode.length>0)
+                    {
+                        arrRightNode.forEach( // if left node then the group will move and we have to expand or shring the x and y coordinates of the line
+                            item => {
+                                if (item != "null") // item could not be there, prevent errors
+                                {
+                                    d3.select("#" + item).remove();
+                                }
+                            }
+                        );
+                    }
+                }
+
+                // delete node
+                node.remove();
+                deleteNode();
+                    
+            }
+
+            // Start Button actions
+
+            /**
+             * Hide/show all zero value connections
+             */
+            function hideZeroConnections()
+            {
+                bHideZeroConnections = !bHideZeroConnections;
+                svg.selectAll("line.count0").style('visibility',function () {
+                    if (bHideZeroConnections) return 'hidden';
+                    else return 'visible';
+                });
+                
+                svg.selectAll("text.count0").style('visibility',function () {
+                    if (bHideZeroConnections) return 'hidden';
+                    else return 'visible';
+                });
+            
+            }
+
+            
+            /**
+             *  hide/show all zero value action nodes
+             */
+            function hideZeroActions()
+            {
+                bHideZeroActions = !bHideZeroActions;
+                svg.selectAll("ellipse.avalue0").style('visibility',function () {
+                    if (bHideZeroActions) return 'hidden';
+                    else return 'visible';
+                });
+                svg.selectAll("text.avalue0").style('visibility',function () {
+                    if (bHideZeroActions) return 'hidden';
+                    else return 'visible';
+                });
+
+            }
+
+            
+            /**
+             *  hide/show all zero value state nodes
+             */
+            function hideZeroStates()
+            {
+                bHideZeroStates = !bHideZeroStates;
+                svg.selectAll("rect.svalue0").style('visibility',function () {
+                    if (bHideZeroStates) return 'hidden';
+                    else return 'visible';
+                });
+                svg.selectAll("text.svalue0").style('visibility',function () {
+                    if (bHideZeroStates) return 'hidden';
+                    else return 'visible';
+                });
+
+            }
+
+
+            // Trigger the possibility to delete node
+            /**
+             * If pruning is activated after deleting turn it off
+             */
+            function deleteNode() {
+                deleteNodeActivate = !deleteNodeActivate;
+                if (deleteNodeActivate)
+                {
+                    document.body.style.cursor = 'grab';
+                } 
+                else
+                {
+                    document.body.style.cursor = '';
+                }
+            }
+
+
+            /**
+            * Goes one step back in the graph. Hides state and action nodes as well as connections.
+            *  uses selectedMaxLevel and maxLevel which are the max current max level and the potential max level
+            */
+            function previousStep() {
+                console.log("Previous step");
+
+                // TODO: Debugging nach next Level nicht mehr Funktionstüchtig
+
+                // console.log(selectedMaxLevel);
+
+                if (selectedMaxLevel > 1)
+                    selectedMaxLevel -= 1
+                    
+                // console.log(selectedMaxLevel);
+
+                // console.log(selectedMaxLevel);
+
+                // hide all nodes and connections from selectMaxLevel + 1 to maximum level
+                for ( let i = selectedMaxLevel + 1; i <= maxLevel; i++ )
+                {
+                    svg.selectAll("g") // iterate through all groups (state, action nodes and connections)
+                    .filter(function() {
+                        
+                        // TODO: Entfernen
+                        // if (d3.select(this).attr("level") == 3 &&  d3.select(this).attr("type") == "connection")
+                        // {
+                            // console.log("con");
+                            // console.log(d3.select(this).attr("level"));
+                        // }
+                        // hide / remove connetions
+                        // TODO: Entfernen
+                        
+/*                        if (d3.select(this).attr("type") == "connection" && d3.select(this).attr("level") ==  && d3.select(this).attr("id")=='id3_s12-3_a20')
+                        {   
+                            console.log("visibility");
+                            console.log(i);
+                            console.log(d3.select(this));
+                            d3.select(this).style("visibility",'hidden');
+                        }*/
+
+                        if ( (d3.select(this).attr("level") == i || ( i > 0 && d3.select(this).attr("level") == i-1 && d3.select(this).attr("type") == 'action' ) ) &&  d3.select(this).attr("rightNode") != null ) 
+                        { // on first layer it could be null
+                            let arrRightNode = d3.select(this).attr("rightNode").split(","); // right connections saved in group (state or action node)
+                            
+                            // console.log(arrRightNode);
+
+                            if ( arrRightNode.length > 0 )
+                            {
+                                arrRightNode.forEach( // hide all nodes on the right side of the action node
+                                    item => {
+                                        
+                                        if (item != "null" && item != "") // if not null we can change the coordinates
+                                        {
+                                            var sel = d3.select( "#" + item ).style('visibility',function () {
+                                                return 'hidden';
+                                            });
+                                        } else
+                                        {
+                                        }
+                                    }
+                                )
+                            }
+
+                        }
+                        
+
+                        return d3.select( this ).attr( "level" ) == i || ( i > 0 && d3.select( this ).attr( "type" ) == "action" && d3.select( this ).attr( "level" ) == i-1); // filter by single attribute
+                    })
+                    .style('visibility',function () {
+                        return 'hidden';
+                    });
+                }
+                
+        /*		            svg.selectAll("g")
+                    .filter(function() {
+                        if (d3.select(this).attr('id') == 'id3_s12-3_a20')
+                        {
+                            console.log(d3.select(this));
+                        }
+                        });*/
+
+            }
+
+            /**
+             * Convert state node to JSON
+             * @param {D3js group Object} stateNode state node to be converted to JSON
+             * 
+             * @return JSON
+             */
+            function stateNodeToJson(stateNode) {
+                let jsonStr = "{"
+                jsonStr += '"uuid":"' + stateNode.attr("uuid") + '",'
+                jsonStr += '"label":"' + stateNode.attr("label") + '",'
+                jsonStr += '"state":"' + stateNode.attr("state") + '",'
+                jsonStr += '"capacity":' + stateNode.attr("capacity") + ","
+                jsonStr += '"value":' + stateNode.attr("value") + ","
+                jsonStr += '"copy":' + stateNode.attr("copy")+ ","
+                jsonStr += '"weight":' + stateNode.attr("weight")
+                jsonStr += "}"
+                
+                return JSON.parse(jsonStr);
+            }
+
+            /**
+             * Convert action node to JSON
+             * @param {D3js group Object} actionNode action node to be converted to JSON
+             * 
+             * @return JSON
+             */
+            function actionNodeToJson(actionNode) {
+                let jsonStr = "{"
+                jsonStr += '"uuid":"' + actionNode.attr("uuid") + '",'
+                jsonStr += '"label":"' + actionNode.attr("label") + '",'
+                jsonStr += '"state":"' + actionNode.attr("state") + '",'
+                jsonStr += '"capacity":' + actionNode.attr("capacity") + ","
+                jsonStr += '"value":' + actionNode.attr("value") + ","
+                jsonStr += '"copy":' + actionNode.attr("copy")+ ","
+                jsonStr += '"weight":' + actionNode.attr("weight")
+                jsonStr += "}"
+                return JSON.parse(jsonStr);
+            }
+
+            /**
+             * Convert connection node to JSON
+             * @param {D3js group Object} connection to be converted to JSON
+             * 
+             * @return JSON
+             */
+            function ConnectionToJson(connection) {
+                let jsonStr = "{"
+                jsonStr += '"uuid":"'       + connection.attr( "uuid" ) + '",'
+                jsonStr += '"leftnode":"'   + connection.attr( "leftnode" ) .split('_')[1] + '",'
+                jsonStr += '"rightnode":"'  + connection.attr( "rightnode" ).split('_')[1] + '",'
+                jsonStr += '"cardinality":' + connection.attr( "cardinality" ) 
+                jsonStr += "}"
+                return jsonStr;
+            }
+
+            // O(n)
+            /**
+             *  Test if state is in states
+             *  @param {string} stateName - name of the state node for presence in states
+             *  @param {array of state object} states - states to be checked for existence of state
+             * 
+             * @returns {boolean} - True if state found in states, false otherwise
+             */
+            function inNodes(stateName, states) {
+                for (let i=0; i<states.length; i++) {
+                    if (states[i].state === stateName) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            /**
+             * Function for waiting a certain time span. Helps for sychronizing
+             * 
+             * @param {integer} milliseconds - Time to wait for in milliseconds
+             */
+            function wait(milliseconds) {
+                return new Promise(resolve => setTimeout(resolve, milliseconds));
+            }
+
+            // TODO: constraints?
+            /**
+             * Convert Editor graph into JSON-Format
+             */
+            async function d3jsToLinGraphJson() {
+                let sibling_constraints = null;
+                let goals = null;
+                let dependency_constraints = null;
+                let action_formulas = null;
+
+                let states = [];
+                let actions = [];
+                let connections = [];
+
+                let mergedStates = [];
+                let mergedActions = [];
+
+                // Start Button actions
+
+                // TODO: Process dependency-constraints
+                // TODO: Process sibling-constraints
+
+                // TODO:
+                /*
+                "uuid":"null",
+                    "label":"copy S1",
+                    "state":"a273",
+                    "capacity":null,
+                    "value":null,
+                    "copy":null,
+                    "weight":null
+                    */
+
+                /*
+                    {
+                    "uuid":"null",
+                    "label":"M",
+                    "state":"s495",
+                    "capacity":null,
+                    "value":null,
+                    "copy":0,
+                    "weight":false
+                },
+                */
+
+                /*
+                "sibling_constraints":[[]],"dependency_constraints":[[]]
+                */
+
+                // wait so primise can be fulfilled
+                await wait(500);
+
+                for (let i = 1; i <=selectedMaxLevel;i++)
+                {
+                    states     [ i ]  = [];
+                    actions    [ i ]  = [];
+                    connections[ i ]  = [];
+                }
+
+                // Gather all states and actions and create JSON String output 
+                svg.selectAll("g")
+                    .filter(function() {
+                        // on first layer it could be null and we do not want to add unnecessary right level connections connected to action nodes
+                        if (d3.select(this).attr("type") =="state" && d3.select(this).style('visibility') != "hidden")
+                        {
+                            if (d3.select(this).attr("level"))
+                            {
+                            states[d3.select(this).attr("level")].push(stateNodeToJson(d3.select(this)));
+                            }
+                        }
+                    });
+
+                    
+
+                svg.selectAll("g")
+                    .filter(function() {
+                        // on first layer it could be null and we do not want to add unnecessary right level connections connected to action nodes
+                        if (d3.select(this).attr("type") =="action" && d3.select(this).style('visibility') != "hidden")
+                        {
+                            actions[d3.select(this).attr("level")].push(actionNodeToJson(d3.select(this)));
+                        }
+                    });
+
+                await wait(500);
+
+                await getJson().then( (json) => 
+                {
+                    sibling_constraints    = json.sibling_constraints;
+                    dependency_constraints = json.dependency_constraints;
+                    goals                  = JSON.stringify(json.goals);
+                    action_formulas        = JSON.stringify(json.action_formulas);
+
+                    // console.log("states");
+                    // console.log(states);
+
+                    //console.log("sib in");
+                    //console.log(sibling_constraints);
+
+
+                    // TODO: NICHT VON JSON!
+                    
+                    states.forEach((item) => 
+                        {
+                            mergedStates = mergedStates.concat(item);
+                        }
+                    );
+
+                    actions.forEach((item) => 
+                        {
+                            mergedActions = mergedActions.concat(item);
+                        }
+                    );
+                    // mergedStates = states;
+                    // mergedActions = actions;
+
+                    // console.log("merged");
+                    // console.log(states[0].state);
+
+                    
+                    // Correct constraints if user has removed nodes
+                    for (let i = 0; i < sibling_constraints.length; i++) {
+                        let continueLoop = false;
+                        // console.log(sibling_constraints[i]);
+                        for (let j = 0; j < sibling_constraints[i].left_nodes.length; j++)
+                        {
+                            if (!inNodes(sibling_constraints[i].left_nodes[j].label, mergedStates) && !inNodes(sibling_constraints[i].left_nodes[j].label, mergedActions))
+                            {
+
+                                // remove Node if it was deleted
+                                sibling_constraints[i].left_nodes.splice(j, 1);
+                                j--;
+                            }
+                            if (sibling_constraints[i].left_nodes.length == 0)
+                            {
+                                // remove Node
+                                sibling_constraints.splice(i,1);
+                                i--;
+                                continueLoop = true; // continue does not work here so we have to set a flag
+                                break; // entire constraint is removed, we can exit here
+                            } 
+                        }
+                        
+                        // if entire constraint do not check right nodes
+                        if (continueLoop)
+                        {
+                            continue;
+                        }
+
+                        for (let j=0; j < sibling_constraints[i].right_nodes.length;j++)
+                        {
+                            if (!inNodes(sibling_constraints[i].right_nodes[j].label, mergedStates) && !inNodes(sibling_constraints[i].right_nodes[j].label, mergedActions))
+                            {
+
+                                // remove Node if it was deleted
+                                sibling_constraints[i].right_nodes.splice(j, 1);
+                                j--;
+                            }
+                            if (sibling_constraints[i].right_nodes.length == 0)
+                            {
+                                // remove Node
+                                sibling_constraints.splice(i,1);
+                                i--;
+                                break; // entire constraint is removed, we can exit here
+                            } 
+
+                        }
+                    }
+
+                    // TODO: DRY
+                    for (let i = 0; i < dependency_constraints.length; i++) {
+                        // console.log(sibling_constraints[i]);
+                        let continueLoop = false;
+                        for (let j = 0; j < dependency_constraints[i].left_nodes.length; j++)
+                        {
+                            if (!inNodes(dependency_constraints[i].left_nodes[j].label, mergedStates)  && !inNodes(dependency_constraints[i].left_nodes[j].label, mergedActions))
+                            {
+
+                                // remove Node if it was deleted
+                                dependency_constraints[i].left_nodes.splice(j, 1);
+                                j--;
+                            }
+                            if (dependency_constraints[i].left_nodes.length == 0)
+                            {
+                                // remove Node
+                                dependency_constraints.splice(i,1);
+                                i--;
+                                continueLoop = true; // continue does not work here so we have to set a flag
+                                break; // entire constraint is removed, we can exit here
+                            } 
+                        }
+                        
+                        // if entire constraint do not check right nodes
+                        if (continueLoop)
+                        {
+                            continue;
+                        }
+
+                        for (let j=0; j < dependency_constraints[i].right_nodes.length;j++)
+                        {
+                            if (!inNodes(dependency_constraints[i].right_nodes[j].label, mergedStates) && !inNodes(dependency_constraints[i].right_nodes[j].label, mergedActions))
+                            {
+                                // remove Node if it was deleted
+                                dependency_constraints[i].right_nodes.splice(j, 1);
+                                j--;
+                            }
+                            if (dependency_constraints[i].right_nodes.length == 0)
+                            {
+                                // remove Node
+                                dependency_constraints.splice(i,1);
+                                i--;
+                                break; // entire constraint is removed, we can exit here
+                            } 
+
+                        }
+                    }
+                });
+
+            svg.selectAll("g")
+            .filter(function() {
+                // on first layer it could be null and we do not want to add unnecessary right level connections connected to action nodes
+                if (d3.select(this).attr("type") =="connection" && d3.select(this).style('visibility') != "hidden")
+                {
+                    if (d3.select(this).attr("rightnode") != 'goal')
+                    {
+                        connections[d3.select(this).attr("level")].push(ConnectionToJson(d3.select(this)));
+                    }
+                }
+            });
+
+                let outstr = "{ \"graph\":[";
+                for (var i = 1; i <= selectedMaxLevel; i++)
+                {
+                    if (i > 1)
+                        outstr += ","; // TODO: States per level
+                    outstr += "{\"level\":" + i.toString() + ",";
+                    outstr += "\"states\":" + JSON.stringify( states[i] ) + ",";
+                    outstr += "\"actions\":" + JSON.stringify( actions[i] ) + ",";
+                    outstr += "\"connections\":[" + connections[i].join().toString() + "]";
+                    outstr += "}";
+                }
+
+                // goals
+                outstr += "],\"goals\":" + goals + ",";
+
+                // constraints
+                outstr += "\"sibling_constraints\":" + JSON.stringify( sibling_constraints ) + ",";
+                outstr += "\"dependency_constraints\":" + JSON.stringify( dependency_constraints ) + ",";
+                outstr += "\"action_formulas\":" + action_formulas + "";
+
+                outstr += "}";
+
+                return outstr;
+            } // - d3jsToLinGraphJson() - end of function 
+
+
+            /***
+             * Go next step of graph
+             * Communicates with server, running LinGraph algorithm
+             */
+            async function nextStep() {
+                var jsonStr = "";
+
+                // create json from displayed and potentially modified graph
+                await d3jsToLinGraphJson().then(
+                    (str) => {
+                        jsonStr = str;
+                        // console.log( str );
+                    }
+
+                );
+
+                console.log("send:");
+                console.log(jsonStr);
+
+                console.log("send json to server")
+                // send json to server
+                requestHeader = {
+                    method: "POST",
+                    headers: {
+                    'X-CSRFToken': "{{csrf_token}}",
+                    'Content-Type': "application/json"
+                    },
+                    body: jsonStr
+                }
+
+                const url = '/showgraph';
+
+                const response = await fetch(url, requestHeader)
+                const data = await response.json()
+                    .then( json => { return json} );
+
+                const jsonStrReceived = await data.data;
+                document.getElementById("graph_output").innerHTML = await data.output
+
+                console.log("reload graph")
+                // reload graph
+
+                console.log(jsonStrReceived);
+                loadNewGraph(jsonStrReceived);
+                
+                await wait(1000);
+                
+                await d3jsToLinGraphJson().then(
+                    (str) => {
+                        jsonStr = str;
+                        // console.log( str );
+                    }
+
+                );
+
+                // TODO: Test
+                svg.selectAll("g")
+                .filter(function() {
+                    if ( d3.select(this).attr("type") == "connection" )
+                    {
+                    
+                        let arrNodes = d3.select(this).attr("id").split("-");
+                        
+                        let cid = d3.select(this).attr("id");
+                        
+                        if (arrNodes != null)
+                        {
+                            svg.selectAll("g").filter(function() {
+                                if (d3.select(this).attr("id") == arrNodes[0])
+                                {
+                                    if (d3.select(this).attr("leftNode") == "")
+                                    {
+                                        d3.select(this).attr("leftNode", cid);
+                                    } else{
+                                        d3.select(this).attr("leftNode", d3.select(this).attr("leftNode") + ',' + cid);
+                                    }
+                                }
+
+                                if (d3.select(this).attr("id") == "id" + arrNodes[1])
+                                {
+                                if (d3.select(this).attr("rightNode") == "")
+                                    {
+                                        d3.select(this).attr("rightNode", cid);
+                                    } else{
+                                        d3.select(this).attr("rightNode", d3.select(this).attr("rightNode") + ',' + cid);
+                                    }
+
+                                }
+                                });
+                        }
+                    }
+                });
+
+            } // nextStep - function end
+
+            /**
+             * Align Nodes 
+             */
+            function alignValueNodes() {
+
+                if (!bHideZeroStates)
+                    hideZeroStates();
+
+                if (!bHideZeroActions)
+                    hideZeroActions()
+
+                if (!bHideZeroConnections)
+                    hideZeroConnections()
+
+
+                let maxNodeCount = svg.selectAll("g").size() - (Math.ceil(svg.selectAll("g").size()/3)); // no connections included
+                slots = new Array( maxNodeCount + 1 );    
+
+                // maxlevel berechnen
+                let maxLevel = 0;
+                svg.selectAll("g").filter(function() {
+                    if (d3.select(this).style('visibility') != 'hidden' && d3.select(this).attr('type') != 'connection' && d3.select(this).attr('type') != null) // && d3.select(this).attr('value') != 0)
+                    {
+                        if (d3.select(this).attr('level') != undefined && d3.select(this).attr('level') > maxLevel) {
+                            maxLevel = d3.select(this).attr('level');
+                        }
+                    }
+                });
+
+                // action y: 50 + i * 200
+                // state  y: 50 + i * 173
+
+                // Action nodes
+                for (var i=0; i<=maxLevel; i++) {
+                    // reset array for every level
+                    slots = new Array(maxNodeCount +1 ).fill(false);
+                    // For each type
+
+                    // action nodes
+                    svg.selectAll("g").filter(function() {
+                        if ( d3.select(this).style('visibility') != 'hidden' && d3.select(this).attr('type') != 'connection' && d3.select(this).attr('value') != 0 && d3.select(this).attr('level') == i && d3.select(this).attr('type') == 'action')
+                        {
+                            let xyCoord = d3.select(this).attr('transform').substring(10,d3.select(this).attr('transform').length-1).split(',');
+                            let y = ((xyCoord[1]-50)/200);
+                            slots[y] = false;
+
+                            // find empty slot
+                            while (y>0 && slots[y-1] == false)
+                            {
+                                y--;
+                            }
+
+                            if (y > -1)
+                            {
+                                slots[ y ] = true;
+                            }
+                            else
+                            {
+                                y = 0;
+                                slots[ y ] = true;
+                            }
+
+                            d3.select(this).attr( "transform", "translate("+ xyCoord[0].toString() + ", " + ((y*200) + 50).toString() + ")")
+                        }
+                    });
+                }
+
+                // State nodes
+                for (var i=0; i<=maxLevel; i++) {
+                    // reset array for every level
+                    slots = new Array(maxNodeCount +1 ).fill(false);
+
+                    svg.selectAll("g").filter(function() {
+                        if ( d3.select(this).style('visibility') != 'hidden' && d3.select(this).attr('type') != 'connection' && d3.select(this).attr('value') != 0 && d3.select(this).attr('level') == i && d3.select(this).attr('type') == 'state')
+                        {
+                            let xyCoord = d3.select(this).attr('transform').substring(10,d3.select(this).attr('transform').length-1).split(',');
+                            let y = ((xyCoord[1]-50)/173);
+                            slots[y] = false;
+
+                            // find empty slot
+                            while ( y > 0 && slots[y-1] == false)
+                            {
+                                y--;
+                            }
+
+                            if (y > -1)
+                            {
+                                slots[ y ] = true;
+                            }
+                            else
+                            {
+                                y = 0;
+                                slots[ y ] = true;
+                            }
+
+                            d3.select(this).attr( "transform", "translate("+ xyCoord[0].toString() + ", " + ((y*173) + 50).toString() + ")")
+                        }
+                    });
+
+
+                    svg.selectAll("g").filter(function() {
+                        if (d3.select(this).style('visibility') != 'hidden' && d3.select(this).attr('type') == 'connection' && d3.select(this).attr('type') != null) // && d3.select(this).attr('value') != 0)
+                        {
+                            try {
+                                let xyCoord = d3.select(this).attr('transform').substring(10,d3.select(this).attr('transform').length-1).split(',');
+                                let id = '#id' + d3.select(this).attr('leftnode');
+                                if (d3.select(id).attr('value') > 0)
+                                {
+                                    let xyCoordLeft = d3.select(id).attr('transform').substring(10,d3.select(id).attr('transform').length-1).split(',');
+                                    let leftCordY = parseInt(xyCoordLeft[1]) + 30;
+                                    d3.select(this).attr( "transform",   "translate(" + xyCoord[0] + "," + leftCordY + ")");
+                                    d3.select(this).select("line").attr( "y2", parseInt(d3.select(this).select("line").attr("y2"))-leftCordY);
+
+                                }
+                            } catch (e) {
+                                console.log(  e.message);
+                            }
+
+                        }
+
+                    });
+
+                    svg.selectAll("g").filter(function() {
+
+                        if (d3.select(this).style('visibility') != 'hidden' && d3.select(this).attr('type') == 'connection' && d3.select(this).attr('type') != null)
+                        {
+
+                            try {
+                                let xyCoord = d3.select(this).attr('transform').substring(10,d3.select(this).attr('transform').length-1).split(',');
+                                let id = '#id' + d3.select(this).attr('rightnode');
+
+                                if (id.substring(0,4) == '#idg')
+                                {
+
+                                    let xyCoordRight = d3.select(id).attr('transform').substring(10,d3.select(id).attr('transform').length-1).split(',');
+
+                                    let y2 = parseInt(xyCoordRight[1])-parseInt(xyCoord[1]) + 50;
+
+                                    // leftlube
+                                    d3.select(this).select("line").attr( "y2", y2 );
+
+                                    d3.select(this).select("text").attr("y",(y2/2));
+
+                                }
+                                else
+                                {
+                                    
+                                    if (d3.select(id).attr('value') > 0)
+                                    {
+                                        
+                                        let xyCoordRight = d3.select(id).attr('transform').substring(10,d3.select(id).attr('transform').length-1).split(',');
+
+                                        let y2 = parseInt(xyCoordRight[1])-parseInt(xyCoord[1]) + 30;
+
+                                        // leftlube
+                                        d3.select(this).select("line").attr( "y2", y2 );
+                                        
+                                        d3.select(this).select("text").attr("y",(y2/2));
+                                    }
+                                }
+                            } catch (e) {
+                                console.log(  e.message);
+                            }
+
+                
+                        };
+                    });
+
+                }
+                    
+            } // alignValueNodes - function end
+
+            /*
+            * Reload graph
+            */
+            async function resetGraph() {
+                var url = '/static/{{form.url}}'; 
+                const res = await fetch(url);
+                getJson().then((json) => {
+                    loadNewGraph(JSON.stringify(json));
+                });
+            }
+
+            /*
+            * Complete Graph from step
+            */
+            async function completeGraph() {
+                
+                var jsonStr = "";
+
+                // create json from displayed and potentially modified graph
+                await d3jsToLinGraphJson().then(
+                    (str) => {
+                        jsonStr = str;
+                        // console.log( str );
+                    }
+
+                );
+                
+                console.log("send json to server")
+                // send json to server
+                requestHeader = {
+                    method: "POST",
+                    headers: {
+                    'X-CSRFToken': "{{csrf_token}}",
+                    'Content-Type': "application/json"
+                    },
+                    body: jsonStr
+                }
+                
+                
+                // TODO: completeGraph!
+                const url = '/showgraph?mode=all';
+
+                const response = await fetch(url, requestHeader)
+                const data = await response.json()
+                    .then( json => { return json} );
+
+                const jsonStrReceived = await data.data;
+
+                console.log("reload graph")
+                // reload graph
+
+                console.log(jsonStrReceived);
+                loadNewGraph(jsonStrReceived);
+                
+                await wait(1000);
+                
+                svg.selectAll("g")
+                .filter(function() {
+                    if ( d3.select(this).attr("type") == "connection" )
+                    {
+                    
+                        let arrNodes = d3.select(this).attr("id").split("-");
+                        
+                        let cid = d3.select(this).attr("id");
+                        
+                        if (arrNodes != null)
+                        {
+                            svg.selectAll("g").filter(function() {
+                                if (d3.select(this).attr("id") == arrNodes[0])
+                                {
+                                    if (d3.select(this).attr("leftNode") == "")
+                                    {
+                                        d3.select(this).attr("leftNode", cid);
+                                    } else{
+                                        d3.select(this).attr("leftNode", d3.select(this).attr("leftNode") + ',' + cid);
+                                    }
+                                }
+
+                                if (d3.select(this).attr("id") == "id" + arrNodes[1])
+                                {
+                                if (d3.select(this).attr("rightNode") == "")
+                                    {
+                                        d3.select(this).attr("rightNode", cid);
+                                    } else{
+                                        d3.select(this).attr("rightNode", d3.select(this).attr("rightNode") + ',' + cid);
+                                    }
+
+                                }
+                                });
+                        }
+                    }
+                });
+                
+                await d3jsToLinGraphJson().then(
+                    (str) => {
+                        jsonStr = str;
+                    }
+
+                );
+                    
+            }
+
+            /*
+            * After a step or run through has been triggered reload the graph
+            */        
+            async function loadNewGraph(inputStr) {
+                var tmpMaxLevel =0 ;
+                var tmpSelectedMaxLevel = 0;
+
+                // d3js delete all elements
+                svg.selectAll("g").remove();
+                svg.selectAll("line").remove();
+                svg.selectAll("text").remove();
+                svg.selectAll("rect").remove();
+                svg.selectAll("circle").remove();
+                svg.selectAll("path").remove();
+
+                // parse JSON
+                json = JSON.parse(inputStr);
+
+                // Set max level                      
+                json.graph.forEach(
+                        item => {
+                            if (item.level > tmpMaxLevel)
+                            {
+                                tmpMaxLevel = item.level;
+                                tmpSelectedMaxLevel = tmpMaxLevel;
+                            }
+                        }
+                );
+                
+                
+                maxLevel = tmpMaxLevel;
+                selectedMaxLevel = tmpSelectedMaxLevel;
+                
+                // generate graph
+                graph(json.graph);
+
+                await wait(1000);
+
+                graphConnection( json.graph );
+
+                await wait(1000);
+
+                goals( json.goals, json.graph.length, json.graph[ json.graph.length - 1 ] );
+
+
+            }
+
+            // ---------------------------------------------------------------
+            // Main
+            // ---------------------------------------------------------------
+
+            // Run if node dragged
+            const drag = d3.drag()
+                .on("start", function(event) {
+                    // TODO: Does not work. Would be good to mark
+                    // d3.select(this).raise().attr("stroke", "black");
+                })
+                .on("drag", function(event) {
+                    var deltax = d3.select(this).node().transform.baseVal[0].matrix.e - event.x; // get the relative position of movement (x-coordinate)
+                    var deltay = d3.select(this).node().transform.baseVal[0].matrix.f - event.y; // get the relative position of movement (y-coordinate)
+                    d3.select(this).attr("transform", `translate(${event.x}, ${event.y})`);
+
+
+                    console.log(d3.select(this).attr('state'));
+                    
+                    // Connections have to also be dragged
+                    // -----------------------------------
+                    // In the leftNode all connections are stored 
+                    if (d3.select(this).attr("leftNode") != null) { // on first layer it could be null
+                        var arrLeftNode = d3.select(this).attr("leftNode").split(",");
+                        if (arrLeftNode.length>0)
+                        {
+                            arrLeftNode.forEach( // if left node then the group will move and we have to expand or shring the x and y coordinates of the line
+                                item => {
+                                    if (item != "null") // item could not be there, prevent errors
+                                    {
+                                        var sel = d3.select( "#" + item ); // get the group of connection
+                                        var posx = sel.node().transform.baseVal[0].matrix.e - deltax; // calculate are delta as we want relative movement
+                                        var posy = sel.node().transform.baseVal[0].matrix.f - deltay;
+                                        var lineposx = Number(sel.select("line").attr("x2")) + deltax; // calculate the line ending coordinates
+                                        var lineposy = Number(sel.select("line").attr("y2")) + deltay;
+                                        sel.attr("transform", `translate(${posx}, ${posy})`); // transform the location of the group line + text of the connection
+                                        sel.select("line").attr( "x2", lineposx ).attr( "y2", lineposy ); // set the coordinates
+                                        var x1 = sel.select("line").attr("x1"); // read out all line coordinates 
+                                        var x2 = sel.select("line").attr("x2"); // for calculating the text coordinates
+                                        var y1 = sel.select("line").attr("y1");
+                                        var y2 = sel.select("line").attr("y2");
+                                        sel.select("text") // select text of the connection group
+                                                .attr( "x", ( ( x2 - x1 ) / 2 ) )
+                                                .attr( "y", ( ( y2 - y1 ) / 2 ) ); // calculate and set text coordinates
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+                    if (d3.select(this).attr("rightNode") != null) { // on first layer it could be null
+                        console.log(d3.select(this).attr("rightNode"));
+                        var arrRightNode = d3.select(this).attr("rightNode").split(","); // right connetions saved in group (state or action node)
+                        if ( arrRightNode.length > 0 )
+                        {
+                            arrRightNode.forEach(
+                                item => {
+                                    if (item != "null") // if not null we can change the coordinates
+                                    {
+                                        // console.log(item);
+                                        var sel = d3.select( "#" + item ); // select group (of connection)
+                                        var lineposx = Number(sel.select("line").attr("x2")) - deltax; // this time only right side has to change
+                                        var lineposy = Number(sel.select("line").attr("y2")) - deltay; // left side (of group) can stay as is
+                                        sel.select("line").attr("x2",lineposx).attr("y2",lineposy); // select line in the group
+                                        var x1 = sel.select("line").attr("x1"); // get line coordinates
+                                        var x2 = sel.select("line").attr("x2"); // for calculating text coordinates
+                                        var y1 = sel.select("line").attr("y1");
+                                        var y2 = sel.select("line").attr("y2");
+                                        sel.select( "text" )
+                                                .attr( "x", ( ( x2 - x1 ) / 2 ) )
+                                                .attr( "y", ( ( y2 - y1 ) / 2 ) ); // set text coordinates
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+                })
+                .on("end", function(event) {
+                    // d3.select(this).attr("stroke", null);
+                    // TODO: deactivate highlighting goes here
+                });
+
+            // ****************************************************************
+            // Start 
+            
+
+            wait(1000); // Time out for overcoming synchronization issues
+
+            // create graph nodes (states, actions)
+            getJson().then( // iterate through json
+                (json) =>
+                {
+                    graph(json.graph);
+                }
+            );
+
+            // Time out for overcoming synchronization issues
+            while(x<10000)
+            {
+                x++;
+            }
+
+            wait(3000); // Time out for overcoming synchronization issues
+
+            // create connections in Graph
+            // needs to be done later as we first need all elements
+            getJson().then( // iterate through json
+                (json) =>
+                {
+                    graphConnection(json.graph);
+                }
+            );
+
+            // create goals???
+            getJson().then( // iterate through json
+                (json) =>
+                {
+                    goals( json.goals, json.graph.length, json.graph[ json.graph.length - 1 ] );
+                }
+            );
+
+            maxHeight = 0;
+
+            getJson().then(
+                        (json) => {                         
+                            json.graph.forEach(
+                        item => {
+                            if (item.level > maxLevel)
+                            {
+                                
+                                maxLevel = item.level;
+                                selectedMaxLevel = maxLevel;
+                                if (item.states.length > maxHeight)
+                                {
+                                    maxHeight = item.states.length;
+                                }
+
+                                // adjust width and height of canvas
+                                svg.attr("height", maxHeight*173+50);
+                                svg.attr("width", maxLevel*600+300);
+                            }
+                        }
+                    ); } );
+
+            container.append(svg.node());
+    
+        </script>
+    </div>
+</body>
+</html>
