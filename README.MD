@@ -1,11 +1,11 @@
 LinGraph
 ------------------------
-LinGraph is a graph-based automated planner for concurrent task planning based on linear logic. This repository provides an implementation of different optimisation methods and a testing interface implemented with Django.
+LinGraph is a graph-based automated planner for concurrent task planning based on linear logic. This repository provides an implementation of different optimization methods and a testing interface implemented with Django.
 
 Software was tested with
 ------------------------
 Browser: Chrome Version 126.0.6478.127 \
-Python 3.10.9 \ 
+Python 3.10.9  
 
 URL: http://127.0.0.1:8000 
 
@@ -23,7 +23,7 @@ docker run -dp 8000:8000 lingraphsim
 Stop docker container
 ---------------------
 docker ps \
-docker stop <container-id> 
+docker stop #container-id#
 
 Main software packages used
 ---------------------------
@@ -44,12 +44,12 @@ restserver/RestPlanServe                                        - Directory for 
 restserver/RestPlanServe/views.py                               - Definition and configuration for views \
 restserver/RestPlanServe/model.py                               - Definition of Modules \
 restserver/RestPlanServe/graph                                  - Direcory for LinGraph files \
-restserver/RestPlanServe/graph/clustering.py                    - Source Code for grouping and merging action formulae \
+restserver/RestPlanServe/graph/clustering.py                    - Source code for grouping and merging action formulae \
 restserver/RestPlanServe/graph/examples.py                      - Different predefined examples \
 restserver/RestPlanServe/graph/graph.py                         - Main LinGraph Algorithm, is callable from path restserver/ \
-restserver/RestPlanServe/graph/fSearch_multiple_or-tools.py     - Path for the Source obtainable at https://github.com/sitar42/LinGraph/blob/87ec3cc5191670cf1f90d87fec7e43528fd22eeb/fSearch_multiple_or-tools.py \
+restserver/RestPlanServe/graph/fSearch_multiple_or-tools.py     - Path to the source code obtainable at https://github.com/sitar42/LinGraph/blob/87ec3cc5191670cf1f90d87fec7e43528fd22eeb/fSearch_multiple_or-tools.py \
 restserver/RestPlanServe/graph/measure.py                       - Source code for similarity and distance functions \
-restserver/RestPlanServe/graph/optimize.py                      - Source Code for weighting and pruning \
+restserver/RestPlanServe/graph/optimize.py                      - Source code for weighting and pruning \
 restserver/RestPlanServe/graph/plangenerator.py                 - Generates random plans \
 restserver/RestPlanServe/graph/test.py                          - Testing different modules of the source code  \
 restserver/RestPlanServe/templates                              - Direcory for Interface of simulator \
