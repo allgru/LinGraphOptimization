@@ -1,3 +1,7 @@
+LinGraph
+------------------------
+LinGraph is a graph-based automated planner for concurrent task planning based on linear logic. This repository provides an implementation of different optimisation methods and a testing interface implemented with Django.
+
 Software was tested with
 ------------------------
 Browser: Chrome Version 126.0.6478.127 \
@@ -53,3 +57,7 @@ restserver/RestPlanServe/templates/graphInterface.html          - Template for r
 restserver/RestPlanServe/templates/output.html                  - Template for analysing and modifying graph \
 output                                                          - Directory for generated files LinGraph Algorithm with optimisation 
 
+Reference
+------------------------------------------------------
+Kortik, S. and Saranli, U., 2017. LinGraph: a graph-based automated planner for concurrent task planning based on linear logic. Applied Intelligence, 47, pp.914-934. \
+https://github.com/sitar42/LinGraph/blob/87ec3cc5191670cf1f90d87fec7e43528fd22eeb/fSearch_multiple_or-tools.py
