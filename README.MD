@@ -47,7 +47,7 @@ restserver/RestPlanServe/graph                                  - Direcory for L
 restserver/RestPlanServe/graph/clustering.py                    - Source code for grouping and merging action formulae \
 restserver/RestPlanServe/graph/examples.py                      - Different predefined examples \
 restserver/RestPlanServe/graph/graph.py                         - Main LinGraph Algorithm, is callable from path restserver/ \
-restserver/RestPlanServe/graph/fSearch_multiple_or-tools.py     - Path to the source code obtainable at https://github.com/sitar42/LinGraph/blob/87ec3cc5191670cf1f90d87fec7e43528fd22eeb/fSearch_multiple_or-tools.py \
+restserver/RestPlanServe/graph/fSearch_multiple_or-tools.py     - Path to the source code obtainable at https://github.com/sitar42/Public_LinGraph \
 restserver/RestPlanServe/graph/measure.py                       - Source code for similarity and distance functions \
 restserver/RestPlanServe/graph/optimize.py                      - Source code for weighting and pruning \
 restserver/RestPlanServe/graph/plangenerator.py                 - Generates random plans \
